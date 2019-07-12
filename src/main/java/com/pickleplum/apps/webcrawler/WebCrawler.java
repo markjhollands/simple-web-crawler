@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2019 Mark Hollands
+ */
+
 package com.pickleplum.apps.webcrawler;
 
 import org.jsoup.HttpStatusException;
@@ -12,35 +16,75 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.util.ArrayList;
 
+/*
+ * @author Mark Hollands
+ * 
+ * Web Crawler application
+ * 
+ * Simple web crawler. Given a URL the application will crawl
+ * each page, retrieve all links and follow local links.
+ * 
+ * The application will not crawl the same link twice, as this
+ * could cause an infinite loop.
+ */
 public class WebCrawler {
 	
 	ArrayList<String> links;
 	String hostname;
 	int port;
 	
+	/*
+	 * Application entry point
+	 * 
+	 * @param args Crawler expects and will only use a single
+	 *             parameter, the URL to crawl.
+	 */
 	public static void main(String[] args) throws IOException {
-		System.out.println("Welcome to Mark's Web Crawler Application");
+		printMessage("Welcome to Mark's Web Crawler Application");
 		
 		Validate.isTrue(args.length == 1, "usage: supply url to fetch");
         String url = args[0];
-        System.out.println(String.format("Fetching %s...", url));
+        printMessage(String.format("Fetching %s...", url));
 		
 		new WebCrawler().crawl(url);
 	}
 	
+	/*
+	 * Constructor
+	 * 
+	 * Initialises links ArrayList
+	 */
 	public WebCrawler() {
 		links = new ArrayList<String>();
 	}
 	
+	/*
+	 * crawl() method
+	 * 
+	 * First crawl method. Validates the URL and stores the
+	 * hostname and port number. It will then start the crawl.
+	 * 
+	 * @param url The URL of the site to crawl
+	 */
 	public void crawl(String url) throws IOException {
 		URL rawURL = new URL(url);
 		hostname = rawURL.getHost();
 		port = rawURL.getPort();
-		System.out.println(String.format("Hostname: %s", hostname));
-		System.out.println(String.format("Port: %d", port));
+		printMessage(String.format("Hostname: %s", hostname));
+		printMessage(String.format("Port: %d", port));
 		crawl("- ", url);
 	}
 	
+	/*
+	 * crawl() method
+	 * 
+	 * Main crawl method. This will be called recursively until
+	 * all local links on a site have been crawled once.
+	 * 
+	 * @param sep Indentation / separation string to indent the
+	 *            line to be printed
+	 * @param url The URL of the site to crawl
+	 */
 	private void crawl(String sep, String url) throws IOException {
 		if (!links.contains(url)) {
         	URL rawURL = new URL(url);
@@ -51,30 +95,53 @@ public class WebCrawler {
         		try {
         			doc = Jsoup.connect(url).get();
         		} catch (ConnectException ce) {
-        			System.out.println(String.format("%s%s (Unable to connect to link, cannot crawl)", sep, url));
+        			printLink(sep, url, "Unable to connect to link, cannot crawl");
         		} catch (HttpStatusException hse) {
         			if (hse.getStatusCode() == 404) {
-        				System.out.println(String.format("%s%s (404 - Link not found, cannot crawl)", sep, url));
+        				printLink(sep, url, "404 - Link not found, cannot crawl");
         			} else {
-        				System.out.println(String.format("%s%s (Unable to connect to link, cannot crawl)", sep, url));
+        				printLink(sep, url, "Unable to connect to link, cannot crawl");
         			}
         		}
         		
         		if (doc != null) {
-        			System.out.println(sep + url);
-        			
         			Elements links = doc.select("a[href]");
-    		        
-    		        System.out.println(String.format("%sLinks: %d", sep, links.size()));
+        			printLink(sep, url, String.format("Links: %d", links.size()));
     		        for (Element link : links) {
     		            crawl("  " + sep, link.attr("abs:href"));
     		        }
         		}
         	} else {
-        		System.out.println(String.format("%s%s (External link, will not crawl)", sep, url));
+        		printLink(sep, url, "External link, will not crawl");
         	}
 		} else {
-			System.out.println(String.format("%s%s (Already crawled)", sep, url));
+			printLink(sep, url, "Already crawled");
 		}
+	}
+	
+	/*
+	 * printLink()
+	 * 
+	 * Helper method to print the link to the screen.
+	 * 
+	 * @param indent            Indentation for line
+	 * @param link              Link to print out
+	 * @param additionalMessage Any additional message to print out
+	 *                          Will appear in brackets after link.
+	 */
+	private void printLink(String indent, String link, String additionalMessage) {
+		printMessage(String.format("%s%s (%s)", indent, link, additionalMessage));
+	}
+	
+	/*
+	 * printMessage()
+	 * 
+	 * Simple helper method to print a message. This
+	 * implementation will print to STDOUT.
+	 * 
+	 * @param message Message to be output
+	 */
+	private static void printMessage(String message) {
+		System.out.println(message);
 	}
 }

@@ -5,4 +5,4 @@ services:
     volumes:
       - ./testhtml:/usr/share/nginx/html:ro
     ports:
-      - "8080:80"
+      - "80:80"
