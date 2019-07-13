@@ -138,4 +138,6 @@ $ docker run -it --rm --name crawler crawler http://172.17.0.2/
 
 ### JUnit testing
 
-TODO...
+I have included a JUnit framework with this application, but no tests.
+
+No test currently exists because of the simplicity of the application, however if the application were to grow in the future, for example to include an API, the framework would exist to include unit tests.
