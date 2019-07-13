@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 public class WebCrawlerTest {
 	
 	@Test
-	public void testCrawl() {
+	public void testFramework() {
 		assertTrue(true);
 	}
 	
